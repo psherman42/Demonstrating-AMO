@@ -67,6 +67,12 @@ This phenomenon doesn't occur for the non-atomic variant because there's a RAW (
 
 Presumably, you could force the AMO version to behave similarly by inserting a dummy hazard. If you have the AMO write `t0` instead of `x0`--even if you never read the value it writes to t0--then there will be a loop-carried WAW (Write-After-Write) hazard that will cause the next iteration's AMO to stall until the current iteration's AMO completes.
 
+The picture below shows the result of `AMOXOR` toggling GPIO twelve times in a Finite Atomic Loop when x[rd] is one of the non-trivial, non-zero registers x1..x31.
+
+`amoxor.w t0, t5, (t6)  # note here t0 instead of x0`
+
+![amo-x rd -force-stall](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/3335f426-fd45-4e98-b198-c908a6609abd)
+
 Thus, register `x0` is special; it is always zero, and when used in place of x[*rd*] as the target of an instruction pipeline's write-back stage it never needs the CPU to “stall” the pipeline. When the timing position of an operation is critical, careful consideration should be made when using register `x0` with any of the RISC-V AMO instructions.
 
 ### First Things, First - edit `riscv.mk` file and ...
