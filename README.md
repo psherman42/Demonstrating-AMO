@@ -1,7 +1,7 @@
 # Demonstrating-AMO
 Simple examples showing how RISC-V atomic instructions work
 
-Atomic instructions mean that there is *no* CPU interrupt between the memory read and the memory write of the trio of read, modify, and write operations. AMO instructions in the RISC-V ISA are somewhat similar to the "bit banding" of ARM ISA; and they are somewhat similar to *synchronized* blocks of critical code in high-level programming languages like Java.
+Atomic instructions mean that there is *no* CPU interrupt between the memory read and the memory write of the trio of read, modify, and write operations. AMO instructions in the RISC-V ISA are somewhat similar to the "bit-banding" instructions of ARM ISA; and they are somewhat similar to *synchronized* blocks of critical code in high-level programming languages like Java.
 
 ### `LW`-`SW` toggling GPIO in a Finite Non-atomic Loop
 
@@ -37,6 +37,8 @@ loop:
 
 ![amoxor w-loop-finite](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/9fecde62-da47-4c41-8b44-bd50073172fa)
 
+(See note below if evenly spaced pulses are desired).
+
 ### `AMOAND` and `AMOOR` toggling GPIO in a Finite Atomic Loop
 
 ```
@@ -57,6 +59,8 @@ loop:
 
 ![amo-andor w](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/b199885f-11d7-453c-be04-37060cf92c9c)
 
+(See note below if evenly spaced pulses are desired).
+
 #### A Word About Periodicity and the RISC-V `AMO` Instructions
 
 When an AMO instruction has `x0` for its x[*rd*] and is in a tight little loop it behaves in a periodic but strangely and unevenly spaced way. Results vary depending how many NOPs are in the loop. This is unlike the non-atomic equivalent LW-op-SW, which always shows a periodic and evenly spaced pattern.
@@ -67,13 +71,13 @@ This phenomenon doesn't occur for the non-atomic variant because there's a RAW (
 
 Presumably, you could force the AMO version to behave similarly by inserting a dummy hazard. If you have the AMO write `t0` instead of `x0`--even if you never read the value it writes to t0--then there will be a loop-carried WAW (Write-After-Write) hazard that will cause the next iteration's AMO to stall until the current iteration's AMO completes.
 
-The picture below shows the result of `AMOXOR` toggling GPIO twelve times in a Finite Atomic Loop when x[rd] is one of the non-trivial, non-zero registers x1..x31.
+The picture below shows the result of `AMOXOR` toggling GPIO twelve times when x[rd] is one of the non-trivial, non-zero registers x1..x31, such as t0.
 
 `amoxor.w t0, t5, (t6)  # note here t0 instead of x0`
 
 ![amo-x rd -force-stall](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/3335f426-fd45-4e98-b198-c908a6609abd)
 
-Thus, register `x0` is special; it is always zero, and when used in place of x[*rd*] as the target of an instruction pipeline's write-back stage it never needs the CPU to “stall” the pipeline. When the timing position of an operation is critical, careful consideration should be made when using register `x0` with any of the RISC-V AMO instructions.
+Thus, register `x0` is special. It is always zero, and when used in place of x[*rd*] as the target of an instruction pipeline's write-back stage it never needs the CPU to “stall” the pipeline. When the timing position of an operation is critical, careful consideration should be made when using register `x0` with any of the RISC-V AMO instructions.
 
 ### First Things, First - edit `riscv.mk` file and ...
 
@@ -83,7 +87,7 @@ Thus, register `x0` is special; it is always zero, and when used in place of x[*
 
 ... un-comment one set of *UM-232*, *TC*, *OLIMEX*, etc. hardware adapters, as desired.
 
-### Workflow
+### Toolchain Workflow
 
 To *clear* all intermediate and binary output files
 
@@ -110,6 +114,8 @@ To start target *debugging* from **RAM** or **ROM/Flash** memory, respectively,
 `   make -f riscv.mk ramdebug`
 
 `   make -f riscv.mk romdebug`
+
+### Recommended Hardware and Test Equipment
 
 An excellent and inexpensive oscilloscope to observe the results of above in real time on real hardware is the "Smart Scope" from https://www.lab-nation.com/store
  
