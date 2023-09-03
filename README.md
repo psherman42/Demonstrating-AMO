@@ -4,48 +4,55 @@ Simple examples showing how RISC-V atomic instructions work
 ### LW-SW toggling GPIO in a Finite Non-atomic Loop
 
 ```
-  lui t6, 0x10012
-  li t5, (1<<12)
-  li s0, 30
+  lui t6, 0x10012   # GPIO_BASE
+  li t5, (1<<12)    # GPIO21
+  li s0, 30         # i = 30
 loop:
-  lw t0, 0x0C(t6)
-  xor t0, t0, t5
-  sw t0, 0x0C(t6)
-  addi s0, so, -1
-  bnez s0, loop
+  lw t0, 0x0C(t6)   # x = gpio_output_val
+  xor t0, t0, t5    # x ^= GPIO21
+  sw t0, 0x0C(t6)   # gpio_output_val = x
+  addi s0, so, -1   # i--
+  bnez s0, loop     # {} while (i != 0);
 ```
+
+![lw-xor-sw](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/53631aca-6491-49d5-aa52-25a131213a66)
+
 
 ### AMOXOR toggling GPIO in a Finite Atomic Loop
 
 ```
-  li t6, 0x1001200C
-  li t5, (1<<21)
-  li s0, 12
+  li t6, 0x1001200C        # GPIO_BASE + GPIO_OUTPUT_VAL
+  li t5, (1<<21)           # GPIO21
+  li s0, 12                # i = 12
 loop:
   nop
   nop
-  amoxor.w x0, t5, (t6)
-  addi s0, s0, -1
-  bnez s0, loop
+  amoxor.w x0, t5, (t6)    # t = M[t6]; M[t6] = t ^ GPIO21; x0 = t
+  addi s0, s0, -1          # i--
+  bnez s0, loop            # {} while (i != 0);
 ```
+
+![amoxor w-loop-finite](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/9fecde62-da47-4c41-8b44-bd50073172fa)
 
 ### AMOAND and AMOOR toggling GPIO in a Finite Atomic Loop
 
 ```
-  li t6, 0x1001200C
-  li t5, (1<<21)
-  li s0, 6
+  li t6, 0x1001200C        # GPIO_BASE + GPIO_OUTPUT_VAL
+  li t5, (1<<21)           # GPIO21
+  li s0, 6                 # i = 6
 loop:
   nop
   not t5, t5
-  amoand.w x0, t5, (t6)
+  amoand.w x0, t5, (t6)    # t = M[t6]; M[t6] = t & ~GPIO21; x0 = t
   not t5, t5
-  amoor.w x0, t5, (t6)
-  addi s0, s0, -1
-  bnez s0, loop
+  amoor.w x0, t5, (t6)     # t = M[t6]; M[t6] = t | GPIO21; x0 = t
+  addi s0, s0, -1          # i--
+  bnez s0, loop            # {} while (i != 0);
 ```
 
-#### Periodicity and the RISC-V `AMO` Instructions
+![amo-andor w](https://github.com/psherman42/Demonstrating-AMO/assets/36460742/2063dd53-5882-4b13-8a5a-4200a99d612a)
+
+#### A Word About Periodicity and the RISC-V `AMO` Instructions
 
 When an AMO instruction has `x0` for its x[*rd*] and is in a tight little loop it behaves in a periodic but strangely and unevenly spaced way. Results vary depending how many NOPs are in the loop. This is unlike the non-atomic equivalent LW-op-SW, which always shows a periodic and evenly spaced pattern.
 
