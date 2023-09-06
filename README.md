@@ -29,7 +29,6 @@ loop:
 loop:
   nop
   nop
-  # change x0 to x1..x31 if evenly spaced pulses are desired, see note below
   amoxor.w x0, t5, (t6)    # t = gpio_output_val; gpio_output_val = t ^ GPIO21; x0 = t
   addi s0, s0, -1          # i--
   bnez s0, loop            # {} while (i != 0);
@@ -48,7 +47,6 @@ loop:
 loop:
   nop
   not t5, t5
-  # change x0 to x1..x31 if evenly spaced pulses are desired, see note below
   amoand.w x0, t5, (t6)    # t = gpio_output_val; gpio_output_val = t & ~GPIO21; x0 = t
   not t5, t5
   # change x0 to x1..x31 if evenly spaced pulses are desired, see note below
