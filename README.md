@@ -130,7 +130,7 @@ https://inst.eecs.berkeley.edu/~cs61c/sp22/pdfs/discussions/disc08-sols.pdf
 Mikko Lipasti. Pipeline Hazards." University of Wisconsin at Madison: CE/CS 552.
 https://pages.cs.wisc.edu/~karu/courses/cs552/fall2020/handouts/lecnotes/10_pipelinehazards.pdf
 
-จุฑาวุฒิจันทรมาลี (Juthawut Chantharamalee). Pipeline (ไปป์ไลน์) บทที่ 12. Suan Dusit University, Bangkok, Thailand: Computer Science Department.
+จุฑาวุฒิ จันทรมาลี (Juthawut Chantharamalee). Pipeline (ไปป์ไลน์) บทที่ 12. Suan Dusit University, Bangkok, Thailand: Computer Science Department.
 ชุดคำสั่งของ pipe line จะยอมรับการ process โดยที่ตัวอื่นๆช้าลงเมื่อมี
 การถ่วงเวลาจะทำให้ชุดคำสั่งช้าลงด้วย ปัญหาที่เกิดขึ้น จากโครงสร้าง (Structural Hazard)
 เมื่อมีการทำ Pipeline มีการทับซ้อนกันของชุดคำสั่ง ในการทำงาน เมื่อ functional unit เกิด
